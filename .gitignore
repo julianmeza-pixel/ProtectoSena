@@ -1,0 +1,4 @@
+uploads/doc_*
+logs/*.log
+match_sport.sql
+superadmin.sql

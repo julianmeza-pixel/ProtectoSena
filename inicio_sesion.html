@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Sport Integration - Iniciar Sesión</title>
+    <link rel="stylesheet" href="home_proyecto.css">
+</head>
+<body class="auth">
+
+<div class="card">
+    <img src="uploads/logo%20plataforma.PNG" alt="Match Sport Integration" class="logo-auth">
+    <div class="brand-title">Match Sport Integration</div>
+    <div class="brand-subtitle">Plataforma de gestión deportiva</div>
+    
+    <div class="section-title">Iniciar sesión</div>
+    <div class="section-desc">Ingresa con tu cuenta para continuar.</div>
+
+    <div id="mensajeEstado" class="aviso" style="display:none; text-align:left;"></div>
+
+    <form action="procesar_login.php" method="POST">
+        <div class="input-group">
+            <select name="rol" required>
+                <option value="" disabled selected>Selecciona tu rol</option>
+                <option value="deportista">Deportista</option>
+                <option value="profesor">Profesor</option>
+                <option value="admin">Administrador</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <input type="email" name="correo" placeholder="Correo Electrónico" required>
+        </div>
+
+        <div class="input-group">
+            <input type="password" name="password" placeholder="Contraseña" required>
+        </div>
+
+        <button type="submit" class="btn-submit">Iniciar sesión</button>
+    </form>
+
+    <div class="card-links">
+        <a href="#">¿Olvidaste tu contraseña?</a><br>
+        ¿Quieres entrenar con nosotros? <a href="registro_sport2.php">Inscríbete como deportista</a>
+    </div>
+</div>
+
+<script>
+   
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const registro = params.get('registro');
+    const caja = document.getElementById('mensajeEstado');
+
+    const mensajes = {
+        credenciales: { texto: 'Correo o contraseña incorrectos.', color: '#b42318', fondo: '#fef3f2' },
+        no_existe:    { texto: 'No existe una cuenta registrada con ese correo en el rol seleccionado.', color: '#b42318', fondo: '#fef3f2' },
+        pendiente:    { texto: 'Tu inscripción todavía está en revisión. Te avisaremos por correo cuando tu cuenta esté activa.', color: '#93370d', fondo: '#fffaeb' },
+        rechazado:    { texto: 'No fue posible tu inscripción. Acércate a un punto físico de la escuela deportiva para más información.', color: '#b42318', fondo: '#fef3f2' }
+    };
+
+    if (error && mensajes[error]) {
+        caja.style.display = 'block';
+        caja.style.color = mensajes[error].color;
+        caja.style.backgroundColor = mensajes[error].fondo;
+        caja.textContent = mensajes[error].texto;
+    } else if (registro === 'exitoso') {
+        caja.style.display = 'block';
+        caja.style.color = '#067647';
+        caja.style.backgroundColor = '#ecfdf3';
+        caja.textContent = 'Tu registro fue enviado correctamente. Te avisaremos por correo cuando sea aprobado.';
+    }
+</script>
+
+</body>
+</html>
