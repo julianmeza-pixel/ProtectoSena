@@ -121,3 +121,16 @@ CREATE TABLE noticias (
   KEY admin_id (admin_id),
   CONSTRAINT noticias_ibfk_admin FOREIGN KEY (admin_id) REFERENCES admins (id) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------- 8. Recuperación de contraseña ----------
+CREATE TABLE IF NOT EXISTS recuperacion_password (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  rol enum('deportista','profesor','admin') NOT NULL,
+  correo varchar(150) NOT NULL,
+  token_hash char(64) NOT NULL,
+  expira datetime NOT NULL,
+  creado timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (id),
+  UNIQUE KEY token_hash (token_hash),
+  KEY cuenta (rol, correo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

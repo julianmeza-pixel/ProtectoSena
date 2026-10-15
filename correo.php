@@ -1,14 +1,14 @@
 <?php
-// correo.php - envío de correos + registro en logs/correos.log
-// Para que mail() funcione en XAMPP hay que configurar el SMTP de Gmail
-// (C:\xampp\sendmail\sendmail.ini y la línea sendmail_path en php.ini).
-function enviar_correo($para, $asunto, $mensaje) {
-    $cabeceras = "From: Match Sport Integration <no-responder@matchsport.com>\r\n"
-               . "Content-Type: text/plain; charset=UTF-8";
-    $asunto_codificado = '=?UTF-8?B?' . base64_encode($asunto) . '?=';
+// correo.php - envío de correos por SMTP (PHPMailer) + registro en logs/correos.log
+// La configuración está en config_correo.php (ver config_correo.ejemplo.php).
+require_once __DIR__ . '/lib/PHPMailer/Exception.php';
+require_once __DIR__ . '/lib/PHPMailer/PHPMailer.php';
+require_once __DIR__ . '/lib/PHPMailer/SMTP.php';
 
-    $enviado = @mail($para, $asunto_codificado, $mensaje, $cabeceras);
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
+function registrar_correo($estado, $para, $asunto, $detalle = '') {
     $carpeta = __DIR__ . '/logs';
     if (!is_dir($carpeta)) {
         mkdir($carpeta, 0755, true);
@@ -16,8 +16,41 @@ function enviar_correo($para, $asunto, $mensaje) {
     }
     file_put_contents(
         $carpeta . '/correos.log',
-        date('Y-m-d H:i:s') . ' | ' . ($enviado ? 'ENVIADO' : 'FALLO') . " | $para | $asunto\n",
+        date('Y-m-d H:i:s') . " | $estado | $para | $asunto" . ($detalle !== '' ? " | $detalle" : '') . "\n",
         FILE_APPEND
     );
-    return $enviado;
+}
+
+function enviar_correo($para, $asunto, $mensaje) {
+    $archivo = __DIR__ . '/config_correo.php';
+    if (!is_file($archivo)) {
+        registrar_correo('FALLO', $para, $asunto, 'Falta config_correo.php');
+        return false;
+    }
+    $cfg = require $archivo;
+
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = $cfg['host'];
+        $mail->Port       = $cfg['puerto'];
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $cfg['usuario'];
+        $mail->Password   = $cfg['clave'];
+        $mail->SMTPSecure = $cfg['puerto'] == 465 ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Timeout    = 15;
+        $mail->CharSet    = 'UTF-8';
+
+        $mail->setFrom($cfg['remitente'], $cfg['nombre']);
+        $mail->addAddress($para);
+        $mail->Subject = $asunto;
+        $mail->Body    = $mensaje;
+
+        $mail->send();
+        registrar_correo('ENVIADO', $para, $asunto);
+        return true;
+    } catch (Exception $e) {
+        registrar_correo('FALLO', $para, $asunto, $mail->ErrorInfo);
+        return false;
+    }
 }

@@ -54,7 +54,7 @@ $_SESSION['flash'] = [
     'tipo'  => $enviado ? 'ok' : 'info',
     'texto' => ($accion === 'aprobar' ? 'Inscripción aprobada; cuenta activada. ' : 'Inscripción rechazada. ')
              . ($enviado ? 'Se envió el correo a ' . $usuario['correo'] . '.'
-                         : 'No se pudo enviar el correo (revisa la configuración SMTP de XAMPP; queda registro en logs/correos.log).'),
+                         : 'No se pudo enviar el correo (revisa config_correo.php; queda registro en logs/correos.log).'),
 ];
 
 header('Location: admin.php');
